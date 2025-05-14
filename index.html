@@ -85,7 +85,9 @@
     </div>
   </div>
 
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
   <script>
+    const socket = io('https://twoj-serwer-websocket-url'); // Zastąp własnym serwerem WebSocket
     const fileInput = document.getElementById('fileInput');
     const videoPlayer = document.getElementById('videoPlayer');
 
@@ -96,23 +98,45 @@
         const url = URL.createObjectURL(file);
         videoPlayer.src = url;
         videoPlayer.style.display = 'block';
-        videoPlayer.load(); // Ładowanie pliku wideo
+        videoPlayer.load();
+        socket.emit('video-load', { url }); // Wysyłanie informacji o załadowanym wideo do innych
       }
     });
 
-    // Testowanie odtworzenia wideo
+    // Wysłanie informacji o odtwarzaniu
     videoPlayer.addEventListener('play', () => {
-      console.log('Wideo jest odtwarzane');
+      socket.emit('play');
     });
 
-    // Testowanie pauzowania wideo
+    // Wysłanie informacji o pauzie
     videoPlayer.addEventListener('pause', () => {
-      console.log('Wideo zostało wstrzymane');
+      socket.emit('pause');
     });
 
-    // Testowanie zakończenia wideo
-    videoPlayer.addEventListener('ended', () => {
-      console.log('Wideo zakończone');
+    // Wysłanie informacji o przewijaniu
+    videoPlayer.addEventListener('seeked', () => {
+      socket.emit('seek', videoPlayer.currentTime);
+    });
+
+    // Odbieranie poleceń z WebSocket
+    socket.on('play', () => {
+      if (videoPlayer.paused) videoPlayer.play();
+    });
+
+    socket.on('pause', () => {
+      if (!videoPlayer.paused) videoPlayer.pause();
+    });
+
+    socket.on('seek', (time) => {
+      videoPlayer.currentTime = time;
+    });
+
+    // Odbieranie informacji o załadowanym wideo
+    socket.on('video-load', (data) => {
+      if (videoPlayer.src !== data.url) {
+        videoPlayer.src = data.url;
+        videoPlayer.load();
+      }
     });
   </script>
 </body>
