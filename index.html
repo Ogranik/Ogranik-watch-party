@@ -85,9 +85,7 @@
     </div>
   </div>
 
-  <script src="https://watch-party-server-jiqi.onrender.com"></script>
   <script>
-    const socket = io("https://watch-party-server-jiqi.onrender.com"); // ← zmień na swój adres
     const fileInput = document.getElementById('fileInput');
     const videoPlayer = document.getElementById('videoPlayer');
 
@@ -102,52 +100,19 @@
       }
     });
 
-    // Wysyła informację o odtworzeniu wideo
+    // Testowanie odtworzenia wideo
     videoPlayer.addEventListener('play', () => {
-      socket.emit('play', videoPlayer.currentTime);
+      console.log('Wideo jest odtwarzane');
     });
 
-    // Wysyła informację o pauzowaniu wideo
+    // Testowanie pauzowania wideo
     videoPlayer.addEventListener('pause', () => {
-      socket.emit('pause');
+      console.log('Wideo zostało wstrzymane');
     });
 
-    // Wysyła informację o zakończeniu wideo (stop)
+    // Testowanie zakończenia wideo
     videoPlayer.addEventListener('ended', () => {
-      socket.emit('stop');
-    });
-
-    // Wysyła informację o przewijaniu wideo
-    videoPlayer.addEventListener('seeked', () => {
-      socket.emit('seek', videoPlayer.currentTime);
-    });
-
-    // Odbiera i synchronizuje odtwarzanie
-    socket.on('play', (time) => {
-      if (videoPlayer.paused) {
-        videoPlayer.play();
-        videoPlayer.currentTime = time; // Ustawia czas wideo
-      }
-    });
-
-    // Odbiera i synchronizuje pauzowanie
-    socket.on('pause', () => {
-      if (!videoPlayer.paused) {
-        videoPlayer.pause();
-      }
-    });
-
-    // Odbiera i synchronizuje zatrzymywanie wideo
-    socket.on('stop', () => {
-      videoPlayer.pause();
-      videoPlayer.currentTime = 0; // Resetuje czas wideo
-    });
-
-    // Odbiera i synchronizuje przewijanie
-    socket.on('seek', (time) => {
-      if (Math.abs(videoPlayer.currentTime - time) > 1) { // Jeśli różnica czasu większa niż 1 sekunda
-        videoPlayer.currentTime = time; // Synchronizuje czas wideo
-      }
+      console.log('Wideo zakończone');
     });
   </script>
 </body>
