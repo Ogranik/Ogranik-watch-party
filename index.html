@@ -64,7 +64,7 @@
 <body>
   <div class="main">
     <div class="left">
-      <video id="videoPlayer" controls style="display: none;"></video>
+      <video id="videoPlayer" controls preload="auto" style="display: none;"></video>
     </div>
 
     <div class="right">
@@ -87,67 +87,66 @@
 
   <script src="https://watch-party-server-jiqi.onrender.com"></script>
   <script>
-    const socket = io("https://watch-party-server-jiqi.onrender.com"); // ← zamień na swój adres
+    const socket = io("https://watch-party-server-jiqi.onrender.com"); // ← zmień na swój adres
     const fileInput = document.getElementById('fileInput');
     const videoPlayer = document.getElementById('videoPlayer');
 
-    // Obsługuje wybór pliku i wyświetla go wideo
+    // Obsługuje wybór pliku wideo
     fileInput.addEventListener('change', function () {
       const file = this.files[0];
       if (file) {
         const url = URL.createObjectURL(file);
         videoPlayer.src = url;
         videoPlayer.style.display = 'block';
+        videoPlayer.load(); // Ładowanie pliku wideo
       }
     });
 
-    // Wysyła informacje o rozpoczęciu odtwarzania
+    // Wysyła informację o odtworzeniu wideo
     videoPlayer.addEventListener('play', () => {
       socket.emit('play', videoPlayer.currentTime);
     });
 
-    // Wysyła informacje o pauzie
+    // Wysyła informację o pauzowaniu wideo
     videoPlayer.addEventListener('pause', () => {
       socket.emit('pause');
     });
 
-    // Wysyła informacje o zatrzymaniu wideo
+    // Wysyła informację o zakończeniu wideo (stop)
     videoPlayer.addEventListener('ended', () => {
       socket.emit('stop');
     });
 
-    // Synchronizuje czas odtwarzania (seek)
+    // Wysyła informację o przewijaniu wideo
     videoPlayer.addEventListener('seeked', () => {
-      socket.emit('seek', videoPlayer.currentTime); // Przesyła aktualny czas
+      socket.emit('seek', videoPlayer.currentTime);
     });
 
-    // Odbiera i synchronizuje inne wydarzenia
-
-    // Play
+    // Odbiera i synchronizuje odtwarzanie
     socket.on('play', (time) => {
       if (videoPlayer.paused) {
         videoPlayer.play();
-        videoPlayer.currentTime = time; // Synchronizowanie czasu odtwarzania
+        videoPlayer.currentTime = time; // Ustawia czas wideo
       }
     });
 
-    // Pause
+    // Odbiera i synchronizuje pauzowanie
     socket.on('pause', () => {
       if (!videoPlayer.paused) {
         videoPlayer.pause();
       }
     });
 
-    // Stop
+    // Odbiera i synchronizuje zatrzymywanie wideo
     socket.on('stop', () => {
       videoPlayer.pause();
-      videoPlayer.currentTime = 0; // Resetowanie czasu wideo
+      videoPlayer.currentTime = 0; // Resetuje czas wideo
     });
 
-    // Seek
+    // Odbiera i synchronizuje przewijanie
     socket.on('seek', (time) => {
       if (Math.abs(videoPlayer.currentTime - time) > 1) { // Jeśli różnica czasu większa niż 1 sekunda
-        videoPlayer.currentTime = time; // Synchronizowanie czasu
+        videoPlayer.currentTime = time; // Synchronizuje czas wideo
       }
     });
   </script>
